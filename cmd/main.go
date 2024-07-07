@@ -6,17 +6,16 @@ import (
 	"github.com/fatih/color"
 
 	"github.com/justbrownbear/microservices_course_auth/app"
-
 )
 
 
-const gRpcPort = 9099;
+const GRPC_PORT = 9099;
 
 
 
 func main() {
 	app.InitApp()
-	err := app.StartApp( gRpcPort );
+	err := app.StartApp( GRPC_PORT );
 
 	if err != nil {
 		fmt.Println( color.RedString( "Failed to start app: %v", err ) )
