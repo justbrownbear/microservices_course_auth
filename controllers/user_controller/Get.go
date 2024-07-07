@@ -19,7 +19,7 @@ func (s *controller) Get(ctx context.Context, req *user_v1.GetRequest) (*user_v1
 
 	createdUpdatedDate := gofakeit.Date()
 
-	payload := &user_v1.GetResponse{
+	result := &user_v1.GetResponse{
 		Id:			req.GetId(),
 		Name:		gofakeit.Name(),
 		Email:		gofakeit.Email(),
@@ -28,5 +28,5 @@ func (s *controller) Get(ctx context.Context, req *user_v1.GetRequest) (*user_v1
 		UpdatedAt:	timestamppb.New( createdUpdatedDate ),
 	}
 
-	return payload, nil
+	return result, nil
 }

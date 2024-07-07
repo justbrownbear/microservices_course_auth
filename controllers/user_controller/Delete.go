@@ -15,7 +15,7 @@ func (s *controller) Delete(ctx context.Context, req *user_v1.DeleteRequest) ( *
 
 	log.Printf("Delete request fired: %v", req.String())
 
-	payload := &emptypb.Empty{}
+	result := &emptypb.Empty{}
 
-	return payload, nil
+	return result, nil
 }

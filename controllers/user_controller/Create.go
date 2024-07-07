@@ -14,9 +14,9 @@ func (s *controller) Create(ctx context.Context, req *user_v1.CreateRequest) (*u
 
 	log.Printf("Create request fired: %v", req.String())
 
-	payload := &user_v1.CreateResponse{
+	result := &user_v1.CreateResponse{
 		Id: rand.Int63n( 100500 ),
 	}
 
-	return payload, nil
+	return result, nil
 }
