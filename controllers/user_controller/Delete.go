@@ -9,9 +9,7 @@ import (
 	"github.com/justbrownbear/microservices_course_auth/pkg/user_v1"
 )
 
-
-
-func (s *controller) Delete(ctx context.Context, req *user_v1.DeleteRequest) ( *emptypb.Empty, error ) {
+func (s *controller) Delete(_ context.Context, req *user_v1.DeleteRequest) (*emptypb.Empty, error) {
 
 	log.Printf("Delete request fired: %v", req.String())
 

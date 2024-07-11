@@ -13,40 +13,32 @@ import (
 	"github.com/justbrownbear/microservices_course_auth/controllers/user_controller"
 )
 
-
-const GRPC_PROTOCOL = "tcp";
-
-
 var grpcServer *grpc.Server
 
-
+// InitApp initializes the gRPC server and registers the user controller.
+// It also enables server reflection for easier debugging and service discovery.
 func InitApp() {
 	grpcServer = grpc.NewServer()
-	reflection.Register( grpcServer )
+	reflection.Register(grpcServer)
 
-	user_controller.InitUserController( grpcServer )
+	user_controller.InitUserController(grpcServer)
 }
 
-
-
-func StartApp( gRpcPort uint16 ) error {
-
-	listenAddress := ":" + strconv.Itoa( int( gRpcPort ) )
-	listener, err := net.Listen( GRPC_PROTOCOL, listenAddress)
-
+// StartApp initializes a gRPC server listener on the specified protocol and port.
+// It logs an error message if the listener fails to initialize.
+// On successful initialization, it logs a message indicating the gRPC server is starting on the specified address.
+func StartApp(grpcProtocol string, grpcPort uint16) error {
+	listenAddress := ":" + strconv.Itoa(int(grpcPort))
+	listener, err := net.Listen(grpcProtocol, listenAddress)
 	if err != nil {
-		log.Printf( color.RedString( "Failed to initialize listener: %v" ), err )
+		log.Printf(color.RedString("Failed to initialize listener: %v"), err)
 		return err
 	}
-
-	log.Printf( color.GreenString( "Starting gRPC server on %s" ), listenAddress )
-
-	err = grpcServer.Serve( listener )
-
+	log.Printf(color.GreenString("Starting gRPC server on %s"), listenAddress)
+	err = grpcServer.Serve(listener)
 	if err != nil {
-		log.Printf( color.RedString( "Failed to start gRPC server: %v" ), err )
+		log.Printf(color.RedString("Failed to start gRPC server: %v"), err)
 		return err
 	}
-
 	return nil
 }

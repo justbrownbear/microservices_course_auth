@@ -8,16 +8,17 @@ import (
 	"github.com/justbrownbear/microservices_course_auth/app"
 )
 
+// Used gRPC protocol
+const gRPCProtocol = "tcp"
 
-const GRPC_PORT = 9099;
-
-
+// Used gRPC port
+const gRPCPort = 9099
 
 func main() {
 	app.InitApp()
-	err := app.StartApp( GRPC_PORT );
+	err := app.StartApp(gRPCProtocol, gRPCPort)
 
 	if err != nil {
-		fmt.Println( color.RedString( "Failed to start app: %v", err ) )
+		fmt.Println(color.RedString("Failed to start app: %v", err))
 	}
 }
