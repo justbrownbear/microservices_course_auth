@@ -13,7 +13,6 @@ import (
 )
 
 func (s *controller) Get(_ context.Context, req *user_v1.GetRequest) (*user_v1.GetResponse, error) {
-
 	log.Printf("Get request fired: %v", req.String())
 
 	createdUpdatedDate := gofakeit.Date()
@@ -44,7 +43,15 @@ func generateRandomRole() user_v1.Role {
 		result = -result
 	}
 
-	result = result % 2
+	maxRoleValue := int32( 0 )
+
+	for _, value := range user_v1.Role_value {
+		if value > maxRoleValue {
+			maxRoleValue = value
+		}
+	}
+
+	result = result % maxRoleValue
 	role := user_v1.Role(result)
 
 	return role

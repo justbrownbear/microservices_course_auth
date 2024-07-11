@@ -29,16 +29,20 @@ func InitApp() {
 // On successful initialization, it logs a message indicating the gRPC server is starting on the specified address.
 func StartApp(grpcProtocol string, grpcPort uint16) error {
 	listenAddress := ":" + strconv.Itoa(int(grpcPort))
+
 	listener, err := net.Listen(grpcProtocol, listenAddress)
 	if err != nil {
 		log.Printf(color.RedString("Failed to initialize listener: %v"), err)
 		return err
 	}
+
 	log.Printf(color.GreenString("Starting gRPC server on %s"), listenAddress)
+
 	err = grpcServer.Serve(listener)
 	if err != nil {
 		log.Printf(color.RedString("Failed to start gRPC server: %v"), err)
 		return err
 	}
+
 	return nil
 }
