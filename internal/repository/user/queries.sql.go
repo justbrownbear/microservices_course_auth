@@ -50,26 +50,28 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, name, email, role, is_deleted, create_timestamp, update_timestamp, delete_timestamp, password_hash
+SELECT id, name, email, role
 	FROM public.users
 	WHERE
 		id = $1
 		AND NOT is_deleted
 `
 
-func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
+type GetUserRow struct {
+	ID    int64
+	Name  string
+	Email string
+	Role  int16
+}
+
+func (q *Queries) GetUser(ctx context.Context, id int64) (GetUserRow, error) {
 	row := q.db.QueryRow(ctx, getUser, id)
-	var i User
+	var i GetUserRow
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
 		&i.Email,
 		&i.Role,
-		&i.IsDeleted,
-		&i.CreateTimestamp,
-		&i.UpdateTimestamp,
-		&i.DeleteTimestamp,
-		&i.PasswordHash,
 	)
 	return i, err
 }

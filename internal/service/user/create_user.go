@@ -3,6 +3,7 @@ package user_service
 import (
 	"context"
 	"errors"
+	"strings"
 
 	user_repository "github.com/justbrownbear/microservices_course_auth/internal/repository/user"
 	"github.com/justbrownbear/microservices_course_auth/internal/service/password_management"
@@ -12,7 +13,10 @@ import (
 
 // ***************************************************************************************************
 // ***************************************************************************************************
-func (userServiceInstance *userService) CreateUser(ctx context.Context, userData *user_model.CreateUserRequest) (uint64, error) {
+func (userServiceInstance *userService) CreateUser(
+	ctx context.Context,
+	userData *user_model.CreateUserRequest,
+) (uint64, error) {
 	err := createUserValidateInputData(userData)
 	if err != nil {
 		return 0, err
@@ -42,11 +46,11 @@ func (userServiceInstance *userService) CreateUser(ctx context.Context, userData
 // ***************************************************************************************************
 // ***************************************************************************************************
 func createUserValidateInputData( userData *user_model.CreateUserRequest ) error {
-	if len(userData.Name) == 0 {
+	if len(strings.TrimSpace(userData.Name)) == 0 {
 		return errors.New("name is required")
 	}
 
-	if len(userData.Email) == 0 {
+	if len(strings.TrimSpace(userData.Email)) == 0 {
 		return errors.New("email is required")
 	}
 
@@ -54,11 +58,11 @@ func createUserValidateInputData( userData *user_model.CreateUserRequest ) error
 		return errors.New("email has invalid format")
 	}
 
-	if len(userData.Password) == 0 {
+	if len(strings.TrimSpace(userData.Password)) == 0 {
 		return errors.New("password is required")
 	}
 
-	if len(userData.PasswordConfirm) == 0 {
+	if len(strings.TrimSpace(userData.PasswordConfirm)) == 0 {
 		return errors.New("password confirmation is required")
 	}
 

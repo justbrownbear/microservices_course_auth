@@ -6,7 +6,7 @@ import (
 )
 
 
-func ToGetUserResponseFromRepository( repoModel *user_repository.User ) *user_model.GetUserResponse {
+func ToGetUserResponseFromRepository( repoModel *user_repository.GetUserRow ) *user_model.GetUserResponse {
 	return &user_model.GetUserResponse {
 		ID: uint64(repoModel.ID),
 		Name: repoModel.Name,
