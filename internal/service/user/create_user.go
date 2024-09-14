@@ -22,15 +22,15 @@ func (userServiceInstance *userService) CreateUser(
 		return 0, err
 	}
 
-	passwordHash, err := password_management.HashPassword( userData.Password );
+	passwordHash, err := password_management.HashPassword(userData.Password)
 	if err != nil {
 		return 0, err
 	}
 
-	payload := user_repository.CreateUserParams {
-		Name: userData.Name,
-		Email: userData.Email,
-		Role: int16(userData.Role),
+	payload := user_repository.CreateUserParams{
+		Name:         userData.Name,
+		Email:        userData.Email,
+		Role:         int16(userData.Role),
 		PasswordHash: passwordHash,
 	}
 
@@ -42,10 +42,9 @@ func (userServiceInstance *userService) CreateUser(
 	return uint64(userID), nil
 }
 
-
 // ***************************************************************************************************
 // ***************************************************************************************************
-func createUserValidateInputData( userData *user_model.CreateUserRequest ) error {
+func createUserValidateInputData(userData *user_model.CreateUserRequest) error {
 	if len(strings.TrimSpace(userData.Name)) == 0 {
 		return errors.New("name is required")
 	}

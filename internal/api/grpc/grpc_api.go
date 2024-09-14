@@ -19,11 +19,9 @@ type GrpcAPI interface {
 	DeleteUser(ctx context.Context, userID uint64) error
 }
 
-
 type grpcAPI struct {
 	txManager transaction_manager.TxManager
 }
-
 
 // InitGrpcAPI инициализирует gRPC API
 func InitGrpcAPI(txManager transaction_manager.TxManager) GrpcAPI {

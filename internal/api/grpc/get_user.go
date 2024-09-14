@@ -17,28 +17,27 @@ func (instance *grpcAPI) GetUser(
 	var result *user_model.GetUserResponse
 
 	// TODO: Переделать на WithConnection
-	err := instance.txManager.WithTransaction( ctx,
-		func ( ctx context.Context, serviceProvider service_provider.ServiceProvider ) error {
+	err := instance.txManager.WithTransaction(ctx,
+		func(ctx context.Context, serviceProvider service_provider.ServiceProvider) error {
 			// В этом месте нам пришел сервис-провайдер, который уже имеет connection внутри себя
 			// Нам осталось только получить нужные сервисы, и...
 			userService := serviceProvider.GetUserService()
 
 			// ...передать их функции, которая на входе принимает только используемые сервисы и in
 			var err error
-			result, err = getUser( ctx, userService, userID )
+			result, err = getUser(ctx, userService, userID)
 			if err != nil {
 				return err
 			}
 
 			return nil
-		} )
+		})
 	if err != nil {
 		return nil, err
 	}
 
 	return result, nil
 }
-
 
 // ***************************************************************************************************
 // ***************************************************************************************************

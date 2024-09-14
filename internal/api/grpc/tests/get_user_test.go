@@ -23,27 +23,26 @@ func TestGetUser(test *testing.T) {
 
 	// Создаем структуру входных параметров
 	type args struct {
-		ctx context.Context
+		ctx    context.Context
 		userID uint64
 	}
 
 	mc := minimock.NewController(test)
-	defer test.Cleanup(mc.Finish)
 
 	// Делаем залипухи
-	ctx			:= context.Background()
-	userID		:= gofakeit.Uint64()
-	name		:= gofakeit.Name()
-	email		:= gofakeit.Email()
-	role		:= user_model.Role( 1 ) // User
-	createdAt	:= gofakeit.Date()
-	updatedAt	:= sql.NullTime{ Time: gofakeit.Date(), Valid: true }
+	ctx := context.Background()
+	userID := gofakeit.Uint64()
+	name := gofakeit.Name()
+	email := gofakeit.Email()
+	role := user_model.Role(1) // User
+	createdAt := gofakeit.Date()
+	updatedAt := sql.NullTime{Time: gofakeit.Date(), Valid: true}
 
-	response	:= &user_model.GetUserResponse {
-		ID: userID,
-		Name: name,
-		Email: email,
-		Role: role,
+	response := &user_model.GetUserResponse{
+		ID:        userID,
+		Name:      name,
+		Email:     email,
+		Role:      role,
 		CreatedAt: createdAt,
 		UpdatedAt: updatedAt,
 	}
@@ -54,20 +53,20 @@ func TestGetUser(test *testing.T) {
 
 	// Создаем набор тестовых кейсов
 	tests := []struct {
-		name			string
-		args			args
-		want			*user_model.GetUserResponse
-		err				error
-		mock	grpcAPIMockFunction
+		name string
+		args args
+		want *user_model.GetUserResponse
+		err  error
+		mock grpcAPIMockFunction
 	}{
 		{
 			name: "success case",
 			args: args{
-				ctx: ctx,
+				ctx:    ctx,
 				userID: userID,
 			},
 			want: response,
-			err: nil,
+			err:  nil,
 			mock: func(mc *minimock.Controller) grpc_api.GrpcAPI {
 				// Делаем мок TxManager
 				txManagerMock := transaction_manager_mock.NewTxManagerMock(mc)
@@ -90,11 +89,11 @@ func TestGetUser(test *testing.T) {
 		{
 			name: "fail case",
 			args: args{
-				ctx: ctx,
+				ctx:    ctx,
 				userID: userID,
 			},
 			want: nil,
-			err: serviceError,
+			err:  serviceError,
 			mock: func(mc *minimock.Controller) grpc_api.GrpcAPI {
 				// Делаем мок TxManager
 				txManagerMock := transaction_manager_mock.NewTxManagerMock(mc)
@@ -121,7 +120,7 @@ func TestGetUser(test *testing.T) {
 		test.Run(testCase.name, func(t *testing.T) {
 			grpcAPIMock := testCase.mock(mc)
 
-			result, err := grpcAPIMock.GetUser(testCase.args.ctx, testCase.args.userID);
+			result, err := grpcAPIMock.GetUser(testCase.args.ctx, testCase.args.userID)
 			require.Equal(t, testCase.err, err)
 			require.Equal(t, testCase.want, result)
 		})

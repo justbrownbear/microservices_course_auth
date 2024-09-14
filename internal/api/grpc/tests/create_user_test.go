@@ -22,30 +22,29 @@ func TestCreateUser(test *testing.T) {
 
 	// Создаем структуру входных параметров
 	type args struct {
-		ctx context.Context
+		ctx      context.Context
 		userData *user_model.CreateUserRequest
 	}
 
 	mc := minimock.NewController(test)
-	defer test.Cleanup(mc.Finish)
 
 	// Делаем залипухи
-	ctx			:= context.Background()
-	userID		:= gofakeit.Uint64()
-	name		:= gofakeit.Name()
-	email		:= gofakeit.Email()
-	password	:= gofakeit.Password(true, true, true, true, true, 10)
+	ctx := context.Background()
+	userID := gofakeit.Uint64()
+	name := gofakeit.Name()
+	email := gofakeit.Email()
+	password := gofakeit.Password(true, true, true, true, true, 10)
 	passwordConfirm := password
-	role		:= user_model.Role( 1 ) // User
+	role := user_model.Role(1) // User
 
-	request		:= &user_model.CreateUserRequest {
-		Name: name,
-		Email: email,
-		Password: password,
+	request := &user_model.CreateUserRequest{
+		Name:            name,
+		Email:           email,
+		Password:        password,
 		PasswordConfirm: passwordConfirm,
-		Role: role,
+		Role:            role,
 	}
-	response	:= userID
+	response := userID
 	serviceError := fmt.Errorf("service error")
 
 	// Объявим тип для функции, которая будет возвращать моки сервисов
@@ -53,20 +52,20 @@ func TestCreateUser(test *testing.T) {
 
 	// Создаем набор тестовых кейсов
 	tests := []struct {
-		name			string
-		args			args
-		want			uint64
-		err				error
-		mock	grpcAPIMockFunction
+		name string
+		args args
+		want uint64
+		err  error
+		mock grpcAPIMockFunction
 	}{
 		{
 			name: "success case",
 			args: args{
-				ctx: ctx,
+				ctx:      ctx,
 				userData: request,
 			},
 			want: response,
-			err: nil,
+			err:  nil,
 			mock: func(mc *minimock.Controller) grpc_api.GrpcAPI {
 				// Делаем мок TxManager
 				txManagerMock := transaction_manager_mock.NewTxManagerMock(mc)
@@ -89,11 +88,11 @@ func TestCreateUser(test *testing.T) {
 		{
 			name: "fail case",
 			args: args{
-				ctx: ctx,
+				ctx:      ctx,
 				userData: request,
 			},
 			want: 0,
-			err: serviceError,
+			err:  serviceError,
 			mock: func(mc *minimock.Controller) grpc_api.GrpcAPI {
 				// Делаем мок TxManager
 				txManagerMock := transaction_manager_mock.NewTxManagerMock(mc)
@@ -120,7 +119,7 @@ func TestCreateUser(test *testing.T) {
 		test.Run(testCase.name, func(t *testing.T) {
 			grpcAPIMock := testCase.mock(mc)
 
-			userID, err := grpcAPIMock.CreateUser(testCase.args.ctx, testCase.args.userData);
+			userID, err := grpcAPIMock.CreateUser(testCase.args.ctx, testCase.args.userData)
 			require.Equal(t, testCase.err, err)
 			require.Equal(t, testCase.want, userID)
 		})

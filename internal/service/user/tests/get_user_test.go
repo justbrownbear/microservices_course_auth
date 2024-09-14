@@ -10,12 +10,12 @@ import (
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/require"
 
+	redis_client_mock "github.com/justbrownbear/microservices_course_auth/internal/client/cache/mocks"
 	user_repository "github.com/justbrownbear/microservices_course_auth/internal/repository/user"
 	user_repository_mock "github.com/justbrownbear/microservices_course_auth/internal/repository/user/mocks"
 	user_service "github.com/justbrownbear/microservices_course_auth/internal/service/user"
 	user_model "github.com/justbrownbear/microservices_course_auth/internal/service/user/model"
 )
-
 
 func TestGetUser(test *testing.T) {
 	test.Parallel()
@@ -26,7 +26,6 @@ func TestGetUser(test *testing.T) {
 	}
 
 	mc := minimock.NewController(test)
-	defer test.Cleanup(mc.Finish)
 
 	ctx := context.Background()
 	userID := gofakeit.Uint64()
@@ -37,17 +36,17 @@ func TestGetUser(test *testing.T) {
 	// updatedAt := sql.NullTime{Time: gofakeit.Date(), Valid: true}
 
 	getUserRepositoryResponse := user_repository.GetUserRow{
-		ID: int64(userID),
-		Name: name,
+		ID:    int64(userID),
+		Name:  name,
 		Email: email,
-		Role: int16(role),
+		Role:  int16(role),
 	}
 
 	response := &user_model.GetUserResponse{
-		ID:        userID,
-		Name:      name,
-		Email:     email,
-		Role:      role,
+		ID:    userID,
+		Name:  name,
+		Email: email,
+		Role:  role,
 		// CreatedAt: createdAt,
 		// UpdatedAt: updatedAt,
 	}
@@ -72,7 +71,11 @@ func TestGetUser(test *testing.T) {
 				userRepositoryMock := user_repository_mock.NewUserRepositoryMock(mc)
 				userRepositoryMock.GetUserMock.Expect(ctx, int64(userID)).Return(getUserRepositoryResponse, nil)
 
-				return user_service.New(userRepositoryMock)
+				cacheMock := redis_client_mock.NewRedisClientMock(mc)
+				cacheMock.HGetAllMock.Return([]interface{}{}, nil)
+				cacheMock.HashSetMock.Return(nil)
+
+				return user_service.New(userRepositoryMock, cacheMock)
 			},
 		},
 		{
@@ -87,7 +90,10 @@ func TestGetUser(test *testing.T) {
 				userRepositoryMock := user_repository_mock.NewUserRepositoryMock(mc)
 				userRepositoryMock.GetUserMock.Expect(ctx, int64(userID)).Return(user_repository.GetUserRow{}, serviceError)
 
-				return user_service.New(userRepositoryMock)
+				cacheMock := redis_client_mock.NewRedisClientMock(mc)
+				cacheMock.HGetAllMock.Return([]interface{}{}, nil)
+
+				return user_service.New(userRepositoryMock, cacheMock)
 			},
 		},
 		{
@@ -100,8 +106,9 @@ func TestGetUser(test *testing.T) {
 			err:  errors.New("user ID is required"),
 			mock: func(mc *minimock.Controller) user_service.UserService {
 				userRepositoryMock := user_repository_mock.NewUserRepositoryMock(mc)
+				cacheMock := redis_client_mock.NewRedisClientMock(mc)
 
-				return user_service.New(userRepositoryMock)
+				return user_service.New(userRepositoryMock, cacheMock)
 			},
 		},
 	}

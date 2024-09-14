@@ -39,7 +39,6 @@ func main() {
 	}
 	defer app.StopApp()
 
-
 	// Создаем канал в котором будем ловить сигналы ОС
 	stopChannel := make(chan os.Signal, 1)
 
@@ -62,8 +61,6 @@ func main() {
 	// А дальше отработает defer
 	log.Println("Shutting down app...")
 }
-
-
 
 func getConfig() (config.GRPCConfig, config.PostgresqlConfig, config.RedisConfig, error) {
 	flag.Parse()

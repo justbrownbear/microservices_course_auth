@@ -56,7 +56,7 @@ func InitApp(
 		MaxIdle:     redisConfig.GetRedisMaxIdle(),
 		IdleTimeout: redisConfig.GetRedisIdleTimeoutSec(),
 		DialContext: func(ctx context.Context) (redis.Conn, error) {
-			redisAddress := net.JoinHostPort( redisConfig.GetRedisHost(), strconv.Itoa(int(redisConfig.GetRedisPort())) )
+			redisAddress := net.JoinHostPort(redisConfig.GetRedisHost(), strconv.Itoa(int(redisConfig.GetRedisPort())))
 			return redis.DialContext(ctx, "tcp", redisAddress)
 		},
 	}
@@ -94,7 +94,6 @@ func StartApp() error {
 
 	return nil
 }
-
 
 // StopApp - Остановка приложения
 func StopApp() {

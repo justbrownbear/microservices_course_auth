@@ -22,25 +22,24 @@ func TestUpdateUser(test *testing.T) {
 
 	// Создаем структуру входных параметров
 	type args struct {
-		ctx context.Context
+		ctx      context.Context
 		userData *user_model.UpdateUserRequest
 	}
 
 	mc := minimock.NewController(test)
-	defer test.Cleanup(mc.Finish)
 
 	// Делаем залипухи
-	ctx			:= context.Background()
-	userID		:= gofakeit.Uint64()
-	name		:= gofakeit.Name()
-	email		:= gofakeit.Email()
-	role		:= user_model.Role( 1 ) // User
+	ctx := context.Background()
+	userID := gofakeit.Uint64()
+	name := gofakeit.Name()
+	email := gofakeit.Email()
+	role := user_model.Role(1) // User
 
-	request		:= &user_model.UpdateUserRequest {
-		ID: userID,
-		Name: name,
+	request := &user_model.UpdateUserRequest{
+		ID:    userID,
+		Name:  name,
 		Email: email,
-		Role: role,
+		Role:  role,
 	}
 	serviceError := fmt.Errorf("service error")
 
@@ -49,15 +48,15 @@ func TestUpdateUser(test *testing.T) {
 
 	// Создаем набор тестовых кейсов
 	tests := []struct {
-		name			string
-		args			args
-		err				error
-		mock	grpcAPIMockFunction
+		name string
+		args args
+		err  error
+		mock grpcAPIMockFunction
 	}{
 		{
 			name: "success case",
 			args: args{
-				ctx: ctx,
+				ctx:      ctx,
 				userData: request,
 			},
 			err: nil,
@@ -83,7 +82,7 @@ func TestUpdateUser(test *testing.T) {
 		{
 			name: "fail case",
 			args: args{
-				ctx: ctx,
+				ctx:      ctx,
 				userData: request,
 			},
 			err: serviceError,
@@ -113,7 +112,7 @@ func TestUpdateUser(test *testing.T) {
 		test.Run(testCase.name, func(t *testing.T) {
 			grpcAPIMock := testCase.mock(mc)
 
-			err := grpcAPIMock.UpdateUser(testCase.args.ctx, testCase.args.userData);
+			err := grpcAPIMock.UpdateUser(testCase.args.ctx, testCase.args.userData)
 			require.Equal(t, testCase.err, err)
 		})
 	}

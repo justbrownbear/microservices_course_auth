@@ -21,7 +21,7 @@ func (userServiceInstance *userService) GetUser(
 	}
 
 	// result, err := userServiceInstance.getUser( ctx, userID )
-	result, err := userServiceInstance.getUserWithCache( ctx, userID )
+	result, err := userServiceInstance.getUserWithCache(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -29,10 +29,9 @@ func (userServiceInstance *userService) GetUser(
 	return result, nil
 }
 
-
 // ***************************************************************************************************
 // ***************************************************************************************************
-func getUserValidateInputData( userID uint64 ) error {
+func getUserValidateInputData(userID uint64) error {
 	if userID <= 0 {
 		return errors.New("user ID is required")
 	}
@@ -40,14 +39,13 @@ func getUserValidateInputData( userID uint64 ) error {
 	return nil
 }
 
-
 // ***************************************************************************************************
 // ***************************************************************************************************
 func (userServiceInstance *userService) getUserWithCache(
 	ctx context.Context,
 	userID uint64,
 ) (*user_model.GetUserResponse, error) {
-	cacheKey := getCacheKey( userID )
+	cacheKey := getCacheKey(userID)
 
 	// Проверяем в кэше
 	values, err := userServiceInstance.cache.HGetAll(ctx, cacheKey)
@@ -62,19 +60,19 @@ func (userServiceInstance *userService) getUserWithCache(
 			return nil, err
 		}
 
-		result := user_converter.GetUserWithCacheConvertFromRedis( userData )
+		result := user_converter.GetUserWithCacheConvertFromRedis(userData)
 
 		return result, nil
 	}
 
 	// Если в кэше нет, то получаем из БД
-	result, err := userServiceInstance.getUser( ctx, userID )
+	result, err := userServiceInstance.getUser(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
 
 	// Сохраняем в кэш
-	cachePayload := user_converter.GetUserWithCacheConvertToRedis( result )
+	cachePayload := user_converter.GetUserWithCacheConvertToRedis(result)
 	err = userServiceInstance.cache.HashSet(ctx, cacheKey, cachePayload)
 	if err != nil {
 		return nil, err
@@ -83,21 +81,20 @@ func (userServiceInstance *userService) getUserWithCache(
 	return result, nil
 }
 
-
 // ***************************************************************************************************
 // ***************************************************************************************************
 func (userServiceInstance *userService) getUser(
 	ctx context.Context,
 	userID uint64,
 ) (*user_model.GetUserResponse, error) {
-	userIdInt64 := int64(userID)
+	userIDInt64 := int64(userID)
 
-	userData, err := userServiceInstance.repository.GetUser(ctx, userIdInt64)
+	userData, err := userServiceInstance.repository.GetUser(ctx, userIDInt64)
 	if err != nil {
 		return nil, err
 	}
 
-	result := user_converter.ToGetUserResponseFromRepository( &userData )
+	result := user_converter.ToGetUserResponseFromRepository(&userData)
 
 	return result, nil
 }

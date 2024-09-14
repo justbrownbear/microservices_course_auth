@@ -13,28 +13,26 @@ func (instance *grpcAPI) DeleteUser(
 	ctx context.Context,
 	userID uint64,
 ) error {
-	err := instance.txManager.WithTransaction( ctx,
-		func ( ctx context.Context, serviceProvider service_provider.ServiceProvider ) error {
+	err := instance.txManager.WithTransaction(ctx,
+		func(ctx context.Context, serviceProvider service_provider.ServiceProvider) error {
 			// В этом месте нам пришел сервис-провайдер, который уже имеет connection внутри себя
 			// Нам осталось только получить нужные сервисы, и...
 			userService := serviceProvider.GetUserService()
 
 			// ...передать их функции, которая на входе принимает только используемые сервисы и in
-			var err error
-			err = deleteUser( ctx, userService, userID )
+			err := deleteUser(ctx, userService, userID)
 			if err != nil {
 				return err
 			}
 
 			return nil
-		} )
+		})
 	if err != nil {
 		return err
 	}
 
 	return nil
 }
-
 
 // ***************************************************************************************************
 // ***************************************************************************************************

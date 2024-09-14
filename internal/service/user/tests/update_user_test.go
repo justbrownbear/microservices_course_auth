@@ -8,13 +8,13 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/gojuno/minimock/v3"
+	redis_client_mock "github.com/justbrownbear/microservices_course_auth/internal/client/cache/mocks"
 	user_repository_mock "github.com/justbrownbear/microservices_course_auth/internal/repository/user/mocks"
 	user_service "github.com/justbrownbear/microservices_course_auth/internal/service/user"
 	user_model "github.com/justbrownbear/microservices_course_auth/internal/service/user/model"
 	"github.com/justbrownbear/microservices_course_auth/internal/service/user/user_converter"
 	"github.com/stretchr/testify/require"
 )
-
 
 func TestUpdateUser(test *testing.T) {
 	test.Parallel()
@@ -25,7 +25,6 @@ func TestUpdateUser(test *testing.T) {
 	}
 
 	mc := minimock.NewController(test)
-	defer test.Cleanup(mc.Finish)
 
 	ctx := context.Background()
 	userID := gofakeit.Uint64()
@@ -59,7 +58,10 @@ func TestUpdateUser(test *testing.T) {
 				userRepositoryMock := user_repository_mock.NewUserRepositoryMock(mc)
 				userRepositoryMock.UpdateUserMock.Expect(ctx, user_converter.UpdateUserConvertRequest(updateUserRequest)).Return(nil)
 
-				return user_service.New(userRepositoryMock)
+				cacheMock := redis_client_mock.NewRedisClientMock(mc)
+				cacheMock.DelMock.Return(nil)
+
+				return user_service.New(userRepositoryMock, cacheMock)
 			},
 		},
 		{
@@ -73,7 +75,9 @@ func TestUpdateUser(test *testing.T) {
 				userRepositoryMock := user_repository_mock.NewUserRepositoryMock(mc)
 				userRepositoryMock.UpdateUserMock.Expect(ctx, user_converter.UpdateUserConvertRequest(updateUserRequest)).Return(serviceError)
 
-				return user_service.New(userRepositoryMock)
+				cacheMock := redis_client_mock.NewRedisClientMock(mc)
+
+				return user_service.New(userRepositoryMock, cacheMock)
 			},
 		},
 		{
@@ -90,8 +94,9 @@ func TestUpdateUser(test *testing.T) {
 			err: errors.New("user ID is required"),
 			mock: func(mc *minimock.Controller) user_service.UserService {
 				userRepositoryMock := user_repository_mock.NewUserRepositoryMock(mc)
+				cacheMock := redis_client_mock.NewRedisClientMock(mc)
 
-				return user_service.New(userRepositoryMock)
+				return user_service.New(userRepositoryMock, cacheMock)
 			},
 		},
 		{
@@ -108,8 +113,9 @@ func TestUpdateUser(test *testing.T) {
 			err: errors.New("email has invalid format"),
 			mock: func(mc *minimock.Controller) user_service.UserService {
 				userRepositoryMock := user_repository_mock.NewUserRepositoryMock(mc)
+				cacheMock := redis_client_mock.NewRedisClientMock(mc)
 
-				return user_service.New(userRepositoryMock)
+				return user_service.New(userRepositoryMock, cacheMock)
 			},
 		},
 	}
@@ -124,4 +130,3 @@ func TestUpdateUser(test *testing.T) {
 		})
 	}
 }
-

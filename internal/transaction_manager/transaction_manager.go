@@ -16,7 +16,9 @@ import (
 // это будет лежать в оригинале в другом package
 type Handler func(ctx context.Context, serviceProvider service_provider.ServiceProvider) error
 
-
+// TxManager defines an interface for managing database transactions.
+// It provides methods to execute handlers within the context of a connection,
+// either with or without a transaction.
 type TxManager interface {
 	// Выполнение handler в контексте подключения без транзакции
 	// WithConnection(ctx context.Context, handler Handler) error
@@ -24,24 +26,31 @@ type TxManager interface {
 	WithTransaction(ctx context.Context, handler Handler) error
 }
 
-
 // В перспективе тут может быть не только pg, но и другие подключения.
 // Например, redis
 type resources struct {
-	dbPool *pgxpool.Pool
-	redisPool *redis.Pool
+	dbPool      *pgxpool.Pool
+	redisPool   *redis.Pool
 	redisConfig *config.RedisConfig
 }
 
-
+// InitTransactionManager initializes and returns a new transaction manager instance.
+// It takes a PostgreSQL connection pool, a Redis connection pool, and a Redis configuration as parameters.
+//
+// Parameters:
+//   - dbPool: A pointer to a pgxpool.Pool representing the PostgreSQL connection pool.
+//   - redisPool: A pointer to a redis.Pool representing the Redis connection pool.
+//   - redisConfig: A pointer to a config.RedisConfig containing the Redis configuration.
+//
+// Returns:
+//   - TxManager: An instance of the transaction manager.
 func InitTransactionManager(dbPool *pgxpool.Pool, redisPool *redis.Pool, redisConfig *config.RedisConfig) TxManager {
 	return &resources{
-		dbPool: dbPool,
-		redisPool: redisPool,
+		dbPool:      dbPool,
+		redisPool:   redisPool,
 		redisConfig: redisConfig,
 	}
 }
-
 
 // Разумеется, это будет лежать в оригинале в другом package
 func (instance *resources) WithTransaction(
@@ -65,14 +74,14 @@ func (instance *resources) WithTransaction(
 	// Настраиваем функцию отсрочки для отката или коммита транзакции.
 	defer func() {
 		// Восстанавливаемся после паники
-		recoverResult := recover();
+		recoverResult := recover()
 		if recoverResult != nil {
 			err = errors.Errorf("panic recovered: %v", recoverResult)
 		}
 
 		// Откатываем транзакцию, если произошла ошибка
 		if err != nil {
-			errRollback := transaction.Rollback(ctx);
+			errRollback := transaction.Rollback(ctx)
 			if errRollback != nil {
 				err = errors.Wrapf(err, "pg errRollback: %v", errRollback)
 			}
@@ -88,7 +97,7 @@ func (instance *resources) WithTransaction(
 	}()
 
 	// Выполняем бизнес-логику
-	err = handler( ctx, serviceProvider )
+	err = handler(ctx, serviceProvider)
 	if err != nil {
 		err = errors.Wrap(err, "failed executing code inside transaction")
 	}

@@ -15,53 +15,48 @@ type ServiceProvider interface {
 	GetUserService() user_service.UserService
 }
 
-
 type serviceProvider struct {
-	dbConnection	*pgx.Conn
-	dbTransaction	*pgx.Tx
+	dbConnection  *pgx.Conn
+	dbTransaction *pgx.Tx
 
-	redisPool		*redis.Pool
-	redisConfig		*config.RedisConfig
+	redisPool   *redis.Pool
+	redisConfig *config.RedisConfig
 
-	redisClient		cache.RedisClient
+	redisClient cache.RedisClient
 
-	userRepository	user_repository.UserRepository
-	userService		user_service.UserService
+	userRepository user_repository.UserRepository
+	userService    user_service.UserService
 }
 
-
-// ***************************************************************************************************
-// ***************************************************************************************************
 // NewWithConnection создает новый экземпляр сервис-провайдера с соединением
+// ***************************************************************************************************
+// ***************************************************************************************************
 func NewWithConnection(dbConnection *pgx.Conn) ServiceProvider {
 	return &serviceProvider{
 		dbConnection: dbConnection,
 	}
 }
 
-
-// ***************************************************************************************************
-// ***************************************************************************************************
 // NewWithTransaction создает новый экземпляр сервис-провайдера с транзакцией
+// ***************************************************************************************************
+// ***************************************************************************************************
 func NewWithTransaction(dbTransaction *pgx.Tx, redisPool *redis.Pool, redisConfig *config.RedisConfig) ServiceProvider {
 	return &serviceProvider{
 		dbTransaction: dbTransaction,
-		redisPool: redisPool,
-		redisConfig: redisConfig,
+		redisPool:     redisPool,
+		redisConfig:   redisConfig,
 	}
 }
-
 
 // ***************************************************************************************************
 // ***************************************************************************************************
 func (instance *serviceProvider) getCacheClient() cache.RedisClient {
 	if instance.redisClient == nil {
-		instance.redisClient = redis_cache.NewClient( instance.redisPool, *instance.redisConfig )
+		instance.redisClient = redis_cache.NewClient(instance.redisPool, *instance.redisConfig)
 	}
 
 	return instance.redisClient
 }
-
 
 // ***************************************************************************************************
 // ***************************************************************************************************
@@ -77,7 +72,6 @@ func (instance *serviceProvider) getUserRepository() user_repository.UserReposit
 
 	return instance.userRepository
 }
-
 
 // ***************************************************************************************************
 // ***************************************************************************************************

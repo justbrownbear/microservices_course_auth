@@ -21,10 +21,9 @@ func (instance *userService) DeleteUser(ctx context.Context, userID uint64) erro
 	return nil
 }
 
-
 // ***************************************************************************************************
 // ***************************************************************************************************
-func deleteUserValidateInputData( userID uint64 ) error {
+func deleteUserValidateInputData(userID uint64) error {
 	if userID <= 0 {
 		return errors.New("user ID is required")
 	}
@@ -41,7 +40,7 @@ func (instance *userService) deleteUserWithCache(ctx context.Context, userID uin
 	}
 
 	// Очищаем кэш пользователя
-	cacheKey := getCacheKey( userID )
+	cacheKey := getCacheKey(userID)
 	err = instance.cache.Del(ctx, cacheKey)
 	if err != nil {
 		return err
@@ -53,9 +52,9 @@ func (instance *userService) deleteUserWithCache(ctx context.Context, userID uin
 // ***************************************************************************************************
 // ***************************************************************************************************
 func (instance *userService) deleteUser(ctx context.Context, userID uint64) error {
-	userIdInt64 := int64(userID)
+	userIDInt64 := int64(userID)
 
-	err := instance.repository.DeleteUser(ctx, userIdInt64)
+	err := instance.repository.DeleteUser(ctx, userIDInt64)
 	if err != nil {
 		return err
 	}

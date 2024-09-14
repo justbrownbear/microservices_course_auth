@@ -22,7 +22,7 @@ type postgresConfig struct {
 	Db       string
 }
 
-// RedisConfig интерфейс для получения конфигурации PostgreSQL
+// PostgresqlConfig интерфейс для получения конфигурации PostgreSQL
 type PostgresqlConfig interface {
 	GetPostgresUser() string
 	GetPostgresPassword() string

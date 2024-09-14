@@ -7,24 +7,22 @@ import (
 )
 
 const (
-	redisHostEnvName					= "REDIS_HOST"
-	redisPortEnvName					= "REDIS_PORT"
-	redisConnectionTimeoutSecEnvName	= "REDIS_CONNECTION_TIMEOUT_SEC"
-	redisMaxIdleSecEnvName				= "REDIS_MAX_IDLE_SEC"
-	redisIdleTimeoutSecEnvName			= "REDIS_IDLE_TIMEOUT_SEC"
+	redisHostEnvName                 = "REDIS_HOST"
+	redisPortEnvName                 = "REDIS_PORT"
+	redisConnectionTimeoutSecEnvName = "REDIS_CONNECTION_TIMEOUT_SEC"
+	redisMaxIdleSecEnvName           = "REDIS_MAX_IDLE_SEC"
+	redisIdleTimeoutSecEnvName       = "REDIS_IDLE_TIMEOUT_SEC"
 )
 
-
 type redisConfig struct {
-	host					string
-	port					uint16
-	connectionTimeoutSec	time.Duration
-	maxIdleSec				int
-	idleTimeoutSec			time.Duration
+	host                 string
+	port                 uint16
+	connectionTimeoutSec time.Duration
+	maxIdleSec           int
+	idleTimeoutSec       time.Duration
 }
 
-
-// PostgresqlConfig интерфейс для получения конфигурации PostgreSQL
+// RedisConfig интерфейс для получения конфигурации PostgreSQL
 type RedisConfig interface {
 	GetRedisHost() string
 	GetRedisPort() uint16
@@ -33,7 +31,7 @@ type RedisConfig interface {
 	GetRedisIdleTimeoutSec() time.Duration
 }
 
-// GetPostgresqlConfig возвращает конфигурацию PostgreSQL
+// GetRedisConfig возвращает конфигурацию PostgreSQL
 func GetRedisConfig() (RedisConfig, error) {
 	host := os.Getenv(redisHostEnvName)
 	if len(host) == 0 {
@@ -82,13 +80,12 @@ func GetRedisConfig() (RedisConfig, error) {
 	}
 	idleTimeoutSecDuration := time.Duration(idleTimeoutSecInt) * time.Second
 
-
 	result := &redisConfig{
-		host:					host,
-		port:					portUint16,
-		connectionTimeoutSec:	connectionTimeoutSecDuration,
-		maxIdleSec:				maxIdleInt,
-		idleTimeoutSec:			idleTimeoutSecDuration,
+		host:                 host,
+		port:                 portUint16,
+		connectionTimeoutSec: connectionTimeoutSecDuration,
+		maxIdleSec:           maxIdleInt,
+		idleTimeoutSec:       idleTimeoutSecDuration,
 	}
 
 	return result, nil

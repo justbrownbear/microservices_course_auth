@@ -25,10 +25,9 @@ func (instance *userService) UpdateUser(ctx context.Context, userData *user_mode
 	return nil
 }
 
-
 // ***************************************************************************************************
 // ***************************************************************************************************
-func updateUserValidateInputData( userData *user_model.UpdateUserRequest ) error {
+func updateUserValidateInputData(userData *user_model.UpdateUserRequest) error {
 	if userData.ID <= 0 {
 		return errors.New("user ID is required")
 	}
@@ -39,7 +38,6 @@ func updateUserValidateInputData( userData *user_model.UpdateUserRequest ) error
 
 	return nil
 }
-
 
 // ***************************************************************************************************
 // ***************************************************************************************************
@@ -53,7 +51,7 @@ func (instance *userService) updateUserWithCache(
 	}
 
 	// Очищаем кэш пользователя
-	cacheKey := getCacheKey( userData.ID )
+	cacheKey := getCacheKey(userData.ID)
 	err = instance.cache.Del(ctx, cacheKey)
 	if err != nil {
 		return err
@@ -61,7 +59,6 @@ func (instance *userService) updateUserWithCache(
 
 	return nil
 }
-
 
 // ***************************************************************************************************
 // ***************************************************************************************************
