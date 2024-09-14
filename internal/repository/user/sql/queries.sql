@@ -7,7 +7,7 @@ INSERT INTO public.users (name, email, role, password_hash)
 
 
 -- name: GetUser :one
-SELECT id, name, email, role
+SELECT id, name, email, role, create_timestamp, update_timestamp
 	FROM public.users
 	WHERE
 		id = @id

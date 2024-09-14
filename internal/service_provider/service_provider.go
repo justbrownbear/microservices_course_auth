@@ -1,7 +1,11 @@
 package service_provider
 
 import (
+	"github.com/gomodule/redigo/redis"
 	"github.com/jackc/pgx/v5"
+	"github.com/justbrownbear/microservices_course_auth/internal/client/cache"
+	redis_cache "github.com/justbrownbear/microservices_course_auth/internal/client/cache/redis"
+	"github.com/justbrownbear/microservices_course_auth/internal/config"
 	user_repository "github.com/justbrownbear/microservices_course_auth/internal/repository/user"
 	user_service "github.com/justbrownbear/microservices_course_auth/internal/service/user"
 )
@@ -15,6 +19,11 @@ type ServiceProvider interface {
 type serviceProvider struct {
 	dbConnection	*pgx.Conn
 	dbTransaction	*pgx.Tx
+
+	redisPool		*redis.Pool
+	redisConfig		*config.RedisConfig
+
+	redisClient		cache.RedisClient
 
 	userRepository	user_repository.UserRepository
 	userService		user_service.UserService
@@ -34,36 +43,49 @@ func NewWithConnection(dbConnection *pgx.Conn) ServiceProvider {
 // ***************************************************************************************************
 // ***************************************************************************************************
 // NewWithTransaction создает новый экземпляр сервис-провайдера с транзакцией
-func NewWithTransaction(dbTransaction *pgx.Tx) ServiceProvider {
+func NewWithTransaction(dbTransaction *pgx.Tx, redisPool *redis.Pool, redisConfig *config.RedisConfig) ServiceProvider {
 	return &serviceProvider{
 		dbTransaction: dbTransaction,
+		redisPool: redisPool,
+		redisConfig: redisConfig,
 	}
 }
 
 
 // ***************************************************************************************************
 // ***************************************************************************************************
-func (serviceProviderInstance *serviceProvider) getUserRepository() user_repository.UserRepository {
-	if serviceProviderInstance.userRepository == nil {
-		serviceProviderInstance.userRepository = user_repository.New(serviceProviderInstance.dbConnection)
+func (instance *serviceProvider) getCacheClient() cache.RedisClient {
+	if instance.redisClient == nil {
+		instance.redisClient = redis_cache.NewClient( instance.redisPool, *instance.redisConfig )
+	}
 
-		if serviceProviderInstance.dbTransaction != nil {
-			serviceProviderInstance.userRepository =
-				serviceProviderInstance.userRepository.WithTx(*serviceProviderInstance.dbTransaction)
+	return instance.redisClient
+}
+
+
+// ***************************************************************************************************
+// ***************************************************************************************************
+func (instance *serviceProvider) getUserRepository() user_repository.UserRepository {
+	if instance.userRepository == nil {
+		instance.userRepository = user_repository.New(instance.dbConnection)
+
+		if instance.dbTransaction != nil {
+			instance.userRepository =
+				instance.userRepository.WithTx(*instance.dbTransaction)
 		}
 	}
 
-	return serviceProviderInstance.userRepository
+	return instance.userRepository
 }
 
 
 // ***************************************************************************************************
 // ***************************************************************************************************
-func (serviceProviderInstance *serviceProvider) GetUserService() user_service.UserService {
-	if serviceProviderInstance.userService == nil {
-		serviceProviderInstance.userService =
-			user_service.New(serviceProviderInstance.getUserRepository())
+func (instance *serviceProvider) GetUserService() user_service.UserService {
+	if instance.userService == nil {
+		instance.userService =
+			user_service.New(instance.getUserRepository(), instance.getCacheClient())
 	}
 
-	return serviceProviderInstance.userService
+	return instance.userService
 }

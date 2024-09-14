@@ -25,3 +25,12 @@ func stringToUint16(s string) (uint16, error) {
 
 	return uint16(parsed), nil
 }
+
+func stringToInt(s string) (int, error) {
+	parsed, err := strconv.ParseInt(s, 10, 16)
+	if err != nil {
+		return 0, fmt.Errorf("failed to convert string to uint16: %v", err)
+	}
+
+	return int(parsed), nil
+}

@@ -7,6 +7,8 @@ package user_repository
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createUser = `-- name: CreateUser :one
@@ -50,7 +52,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, name, email, role
+SELECT id, name, email, role, create_timestamp, update_timestamp
 	FROM public.users
 	WHERE
 		id = $1
@@ -58,10 +60,12 @@ SELECT id, name, email, role
 `
 
 type GetUserRow struct {
-	ID    int64
-	Name  string
-	Email string
-	Role  int16
+	ID              int64
+	Name            string
+	Email           string
+	Role            int16
+	CreateTimestamp pgtype.Timestamp
+	UpdateTimestamp pgtype.Timestamp
 }
 
 func (q *Queries) GetUser(ctx context.Context, id int64) (GetUserRow, error) {
@@ -72,6 +76,8 @@ func (q *Queries) GetUser(ctx context.Context, id int64) (GetUserRow, error) {
 		&i.Name,
 		&i.Email,
 		&i.Role,
+		&i.CreateTimestamp,
+		&i.UpdateTimestamp,
 	)
 	return i, err
 }

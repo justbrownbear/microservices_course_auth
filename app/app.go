@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/fatih/color"
+	"github.com/gomodule/redigo/redis"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -19,6 +20,7 @@ import (
 )
 
 var dbPool *pgxpool.Pool
+var redisPool *redis.Pool
 var grpcServer *grpc.Server
 
 var grpcConfig config.GRPCConfig
@@ -50,7 +52,16 @@ func InitApp(
 		return err
 	}
 
-	transactionManager := transaction_manager.InitTransactionManager(dbPool)
+	redisPool = &redis.Pool{
+		MaxIdle:     redisConfig.GetRedisMaxIdle(),
+		IdleTimeout: redisConfig.GetRedisIdleTimeoutSec(),
+		DialContext: func(ctx context.Context) (redis.Conn, error) {
+			redisAddress := net.JoinHostPort( redisConfig.GetRedisHost(), strconv.Itoa(int(redisConfig.GetRedisPort())) )
+			return redis.DialContext(ctx, "tcp", redisAddress)
+		},
+	}
+
+	transactionManager := transaction_manager.InitTransactionManager(dbPool, redisPool, &redisConfig)
 	grpcAPI := grpc_api.InitGrpcAPI(transactionManager)
 
 	user_controller.InitUserController(grpcServer, grpcAPI)
@@ -82,25 +93,6 @@ func StartApp() error {
 	}
 
 	return nil
-
-
-	// listenAddress := ":" + strconv.Itoa(int(grpcPort))
-
-	// listener, err := net.Listen(grpcProtocol, listenAddress)
-	// if err != nil {
-	// 	log.Printf(color.RedString("Failed to initialize listener: %v"), err)
-	// 	return err
-	// }
-
-	// log.Printf(color.GreenString("Starting gRPC server on %s"), listenAddress)
-
-	// err = grpcServer.Serve(listener)
-	// if err != nil {
-	// 	log.Printf(color.RedString("Failed to start gRPC server: %v"), err)
-	// 	return err
-	// }
-
-	// return nil
 }
 
 
@@ -110,6 +102,10 @@ func StopApp() {
 
 	grpcServer.Stop()
 	dbPool.Close()
+	err := redisPool.Close()
+	if err != nil {
+		log.Printf(color.RedString("Failed to close redis pool: %v"), err)
+	}
 
 	log.Println(color.GreenString("Application stopped successfully. Bye."))
 }

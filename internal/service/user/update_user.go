@@ -11,15 +11,13 @@ import (
 
 // ***************************************************************************************************
 // ***************************************************************************************************
-func (userServiceInstance *userService) UpdateUser(ctx context.Context, userData *user_model.UpdateUserRequest) error {
+func (instance *userService) UpdateUser(ctx context.Context, userData *user_model.UpdateUserRequest) error {
 	err := updateUserValidateInputData(userData)
 	if err != nil {
 		return err
 	}
 
-	payload := user_converter.UpdateUserConvertRequest(userData)
-
-	err = userServiceInstance.repository.UpdateUser(ctx, payload)
+	err = instance.updateUserWithCache(ctx, userData)
 	if err != nil {
 		return err
 	}
@@ -37,6 +35,45 @@ func updateUserValidateInputData( userData *user_model.UpdateUserRequest ) error
 
 	if len(userData.Email) > 0 && !validator.IsValidEmail(userData.Email) {
 		return errors.New("email has invalid format")
+	}
+
+	return nil
+}
+
+
+// ***************************************************************************************************
+// ***************************************************************************************************
+func (instance *userService) updateUserWithCache(
+	ctx context.Context,
+	userData *user_model.UpdateUserRequest,
+) error {
+	err := instance.updateUser(ctx, userData)
+	if err != nil {
+		return err
+	}
+
+	// Очищаем кэш пользователя
+	cacheKey := getCacheKey( userData.ID )
+	err = instance.cache.Del(ctx, cacheKey)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+
+// ***************************************************************************************************
+// ***************************************************************************************************
+func (instance *userService) updateUser(
+	ctx context.Context,
+	userData *user_model.UpdateUserRequest,
+) error {
+	payload := user_converter.UpdateUserConvertRequest(userData)
+
+	err := instance.repository.UpdateUser(ctx, payload)
+	if err != nil {
+		return err
 	}
 
 	return nil

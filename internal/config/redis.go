@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"os"
+	"time"
 )
 
 const (
@@ -17,9 +18,9 @@ const (
 type redisConfig struct {
 	host					string
 	port					uint16
-	connectionTimeoutSec	uint16
-	maxIdleSec				uint16
-	idleTimeoutSec			uint16
+	connectionTimeoutSec	time.Duration
+	maxIdleSec				int
+	idleTimeoutSec			time.Duration
 }
 
 
@@ -27,9 +28,9 @@ type redisConfig struct {
 type RedisConfig interface {
 	GetRedisHost() string
 	GetRedisPort() uint16
-	GetRedisConnectionTimeoutSec() uint16
-	GetRedisMaxIdle() uint16
-	GetRedisIdleTimeoutSec() uint16
+	GetRedisConnectionTimeoutSec() time.Duration
+	GetRedisMaxIdle() int
+	GetRedisIdleTimeoutSec() time.Duration
 }
 
 // GetPostgresqlConfig возвращает конфигурацию PostgreSQL
@@ -54,17 +55,18 @@ func GetRedisConfig() (RedisConfig, error) {
 		return nil, errors.New(redisConnectionTimeoutSecEnvName + " parameter not set")
 	}
 
-	connectionTimeoutSecUint16, err := stringToUint16(connectionTimeoutSec)
+	connectionTimeoutSecInt, err := stringToInt(connectionTimeoutSec)
 	if err != nil {
 		return nil, err
 	}
+	connectionTimeoutSecDuration := time.Duration(connectionTimeoutSecInt) * time.Second
 
 	maxIdleSec := os.Getenv(redisMaxIdleSecEnvName)
 	if len(port) == 0 {
 		return nil, errors.New(redisMaxIdleSecEnvName + " parameter not set")
 	}
 
-	maxIdleUint16, err := stringToUint16(maxIdleSec)
+	maxIdleInt, err := stringToInt(maxIdleSec)
 	if err != nil {
 		return nil, err
 	}
@@ -74,18 +76,19 @@ func GetRedisConfig() (RedisConfig, error) {
 		return nil, errors.New(redisIdleTimeoutSecEnvName + " parameter not set")
 	}
 
-	idleTimeoutSecUint16, err := stringToUint16(idleTimeoutSec)
+	idleTimeoutSecInt, err := stringToInt(idleTimeoutSec)
 	if err != nil {
 		return nil, err
 	}
+	idleTimeoutSecDuration := time.Duration(idleTimeoutSecInt) * time.Second
 
 
 	result := &redisConfig{
 		host:					host,
 		port:					portUint16,
-		connectionTimeoutSec:	connectionTimeoutSecUint16,
-		maxIdleSec:				maxIdleUint16,
-		idleTimeoutSec:			idleTimeoutSecUint16,
+		connectionTimeoutSec:	connectionTimeoutSecDuration,
+		maxIdleSec:				maxIdleInt,
+		idleTimeoutSec:			idleTimeoutSecDuration,
 	}
 
 	return result, nil
@@ -99,14 +102,14 @@ func (c *redisConfig) GetRedisPort() uint16 {
 	return c.port
 }
 
-func (c *redisConfig) GetRedisConnectionTimeoutSec() uint16 {
+func (c *redisConfig) GetRedisConnectionTimeoutSec() time.Duration {
 	return c.connectionTimeoutSec
 }
 
-func (c *redisConfig) GetRedisMaxIdle() uint16 {
+func (c *redisConfig) GetRedisMaxIdle() int {
 	return c.maxIdleSec
 }
 
-func (c *redisConfig) GetRedisIdleTimeoutSec() uint16 {
+func (c *redisConfig) GetRedisIdleTimeoutSec() time.Duration {
 	return c.idleTimeoutSec
 }

@@ -27,6 +27,7 @@ get-deps:
 	go get -u github.com/stretchr/testify/require && \
 	go get -u github.com/joho/godotenv && \
 	go get -u github.com/pkg/errors && \
+	go get -u github.com/gomodule/redigo/redis && \
 	go get -u google.golang.org/protobuf
 
 install-golangci-lint:

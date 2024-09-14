@@ -3,10 +3,12 @@ package transaction_manager
 import (
 	"context"
 
+	"github.com/gomodule/redigo/redis"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pkg/errors"
 
+	"github.com/justbrownbear/microservices_course_auth/internal/config"
 	"github.com/justbrownbear/microservices_course_auth/internal/service_provider"
 )
 
@@ -27,15 +29,18 @@ type TxManager interface {
 // Например, redis
 type resources struct {
 	dbPool *pgxpool.Pool
+	redisPool *redis.Pool
+	redisConfig *config.RedisConfig
 }
 
 
-func InitTransactionManager(dbPool *pgxpool.Pool) TxManager {
+func InitTransactionManager(dbPool *pgxpool.Pool, redisPool *redis.Pool, redisConfig *config.RedisConfig) TxManager {
 	return &resources{
 		dbPool: dbPool,
+		redisPool: redisPool,
+		redisConfig: redisConfig,
 	}
 }
-
 
 
 // Разумеется, это будет лежать в оригинале в другом package
@@ -49,6 +54,14 @@ func (instance *resources) WithTransaction(
 		return err
 	}
 
+	// Инициализируем сервис-провайдер транзакцией
+	serviceProvider := service_provider.NewWithTransaction(&transaction, instance.redisPool, instance.redisConfig)
+	// А можем и с коннекшеном
+	// serviceProvider := getServiceProviderWithConnection(&connection)
+
+	// TODO: В рамках менеджера транзакций мы так же эмулируем транзакции к Redis
+	// redisClient := serviceProvider.getRedisClient()
+
 	// Настраиваем функцию отсрочки для отката или коммита транзакции.
 	defer func() {
 		// Восстанавливаемся после паники
@@ -61,17 +74,18 @@ func (instance *resources) WithTransaction(
 		if err != nil {
 			errRollback := transaction.Rollback(ctx);
 			if errRollback != nil {
-				err = errors.Wrapf(err, "errRollback: %v", errRollback)
+				err = errors.Wrapf(err, "pg errRollback: %v", errRollback)
 			}
+
+			// TODO: В рамках менеджера транзакций мы так же эмулируем транзакции к Redis
+			// errRollback = redisClient.Close()
+			// if errRollback != nil {
+			// 	err = errors.Wrapf(err, "redis errRollback: %v", errRollback)
+			// }
 
 			return
 		}
 	}()
-
-	// Инициализируем сервис-провайдер транзакцией
-	serviceProvider := service_provider.NewWithTransaction(&transaction)
-	// А можем и с коннекшеном
-	// serviceProvider := getServiceProviderWithConnection(&connection)
 
 	// Выполняем бизнес-логику
 	err = handler( ctx, serviceProvider )
@@ -83,8 +97,14 @@ func (instance *resources) WithTransaction(
 	if err == nil {
 		err = transaction.Commit(ctx)
 		if err != nil {
-			err = errors.Wrap(err, "tx commit failed")
+			err = errors.Wrap(err, "pg tx commit failed")
 		}
+
+		// TODO: В рамках менеджера транзакций мы так же эмулируем транзакции к Redis
+		// err = redisClient.Commit(ctx)
+		// if err != nil {
+		// 	err = errors.Wrap(err, "redis tx commit failed")
+		// }
 	}
 
 	return err

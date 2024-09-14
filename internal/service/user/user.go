@@ -3,6 +3,7 @@ package user_service
 import (
 	"context"
 
+	"github.com/justbrownbear/microservices_course_auth/internal/client/cache"
 	user_repository "github.com/justbrownbear/microservices_course_auth/internal/repository/user"
 	user_model "github.com/justbrownbear/microservices_course_auth/internal/service/user/model"
 )
@@ -21,13 +22,15 @@ type UserService interface {
 
 
 type userService struct {
-	repository user_repository.UserRepository
+	repository	user_repository.UserRepository
+	cache		cache.RedisClient
 }
 
 
 // New инициализирует сервис пользователей
-func New(repository user_repository.UserRepository) UserService {
+func New(repository user_repository.UserRepository, cache cache.RedisClient) UserService {
 	return &userService{
 		repository: repository,
+		cache: cache,
 	}
 }
