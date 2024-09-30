@@ -62,3 +62,11 @@ generate-auth-api:
 
 generate-sqlc:
 	$(LOCAL_BIN)/sqlc generate
+
+gen-cert:
+	openssl genrsa -out ./certificates/ca.key 4096
+	openssl req -new -x509 -key ./certificates/ca.key -sha256 -subj "/C=US/ST=NJ/O=CA, Inc." -days 365 -out ./certificates/ca.cert
+	openssl genrsa -out ./certificates/service.key 4096
+	openssl req -new -key ./certificates/service.key -out ./certificates/service.csr -config certificate.conf
+	openssl x509 -req -in ./certificates/service.csr -CA ./certificates/ca.cert -CAkey ./certificates/ca.key -CAcreateserial \
+    		-out ./certificates/service.pem -days 365 -sha256 -extfile certificate.conf -extensions req_ext

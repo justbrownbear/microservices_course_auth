@@ -13,6 +13,7 @@ import (
 	"github.com/gomodule/redigo/redis"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/reflection"
 
 	user_controller "github.com/justbrownbear/microservices_course_auth/controllers/user_grpc_controller"
@@ -130,7 +131,12 @@ func StopApp() {
 // ***************************************************************************************************
 // ***************************************************************************************************
 func initGrpcServer() *grpc.Server {
-	grpcServerInstance := grpc.NewServer()
+	creds, err := credentials.NewServerTLSFromFile("../certificates/service.pem", "../certificates/service.key")
+	if err != nil {
+		log.Fatalf("failed to load TLS keys: %v", err)
+	}
+
+	grpcServerInstance := grpc.NewServer(grpc.Creds(creds))
 	reflection.Register(grpcServerInstance)
 
 	return grpcServerInstance

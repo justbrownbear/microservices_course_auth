@@ -3,3 +3,4 @@
 /bin/
 .env.local
 .env.production
+certificates/
