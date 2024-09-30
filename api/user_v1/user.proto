@@ -11,6 +11,7 @@ option go_package = "github.com/justbrownbear/microservices_course_auth/pkg/user
 
 service UserV1 {
 	rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+	rpc CreateUserAsync(CreateUserRequest) returns (google.protobuf.Empty);
 	rpc GetUser(GetUserRequest) returns (GetUserResponse);
 	rpc UpdateUser(UpdateUserRequest) returns (google.protobuf.Empty);
 	rpc DeleteUser(DeleteUserRequest) returns (google.protobuf.Empty);

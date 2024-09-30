@@ -1,4 +1,4 @@
-package grpc_api
+package kafka_api
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 
 // ***************************************************************************************************
 // ***************************************************************************************************
-func (instance *grpcAPI) CreateUser(ctx context.Context, userData *user_model.CreateUserRequest) (uint64, error) {
+func (instance *kafkaAPI) CreateUser(ctx context.Context, userData *user_model.CreateUserRequest) (uint64, error) {
 	var userID uint64
 
 	err := instance.txManager.WithTransaction(ctx,

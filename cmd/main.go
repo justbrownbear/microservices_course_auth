@@ -17,6 +17,8 @@ import (
 // Путь к файлу конфига
 var configPath string
 
+// ***************************************************************************************************
+// ***************************************************************************************************
 func init() {
 	flag.StringVar(&configPath, "config-path", ".env", "path to config file")
 }
@@ -25,14 +27,14 @@ func main() {
 	ctx := context.Background()
 
 	// Получаем и валидируем конфиг
-	grpcConfig, postgresqlConfig, redisConfig, err := getConfig()
+	grpcConfig, postgresqlConfig, redisConfig, kafkaConfig, err := getConfig()
 	if err != nil {
 		log.Printf(color.RedString("Failed to get config: %v"), err)
 		os.Exit(1)
 	}
 
 	// Инициализируем приложение
-	err = app.InitApp(ctx, postgresqlConfig, redisConfig, grpcConfig)
+	err = app.InitApp(ctx, postgresqlConfig, redisConfig, grpcConfig, kafkaConfig)
 	if err != nil {
 		log.Printf(color.RedString("Failed to init app: %v"), err)
 		os.Exit(1)
@@ -43,11 +45,11 @@ func main() {
 	stopChannel := make(chan os.Signal, 1)
 
 	// Регистрируем сигналы, которые будем ловить в канале stopChannel
-	signal.Notify(stopChannel, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(stopChannel, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 
 	// Чтобы не блокировать основной поток, запускаем сервер в горутине
 	go func() {
-		err := app.StartApp()
+		err := app.StartApp(ctx)
 		if err != nil {
 			log.Println(color.RedString("Failed to start app: %v"), err)
 		}
@@ -62,39 +64,47 @@ func main() {
 	log.Println("Shutting down app...")
 }
 
-func getConfig() (config.GRPCConfig, config.PostgresqlConfig, config.RedisConfig, error) {
+// ***************************************************************************************************
+// ***************************************************************************************************
+func getConfig() (config.GRPCConfig, config.PostgresqlConfig, config.RedisConfig, config.KafkaConfig, error) {
 	flag.Parse()
 
 	currentDir, err := os.Getwd()
 	if err != nil {
 		log.Printf(color.RedString("Failed to get current directory: %v"), err)
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 	log.Println("Current Directory:", currentDir)
 
 	err = config.Load(configPath)
 	if err != nil {
 		log.Printf(color.RedString("Failed to load config: %v"), err)
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 
 	grpcConfig, err := config.GetGrpcConfig()
 	if err != nil {
 		log.Printf(color.RedString("Failed to get gRPC config: %v"), err)
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 
 	postgresqlConfig, err := config.GetPostgresqlConfig()
 	if err != nil {
 		log.Printf(color.RedString("Failed to get PostgreSQL config: %v"), err)
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 
 	redisConfig, err := config.GetRedisConfig()
 	if err != nil {
-		log.Printf(color.RedString("Failed to get PostgreSQL config: %v"), err)
-		return nil, nil, nil, err
+		log.Printf(color.RedString("Failed to get Redis config: %v"), err)
+		return nil, nil, nil, nil, err
 	}
 
-	return grpcConfig, postgresqlConfig, redisConfig, nil
+	kafkaConfig, err := config.GetKafkaConfig()
+	if err != nil {
+		log.Printf(color.RedString("Failed to get Kafka config: %v"), err)
+		return nil, nil, nil, nil, err
+	}
+
+	return grpcConfig, postgresqlConfig, redisConfig, kafkaConfig, nil
 }

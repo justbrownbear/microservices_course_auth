@@ -6,14 +6,15 @@ import (
 
 	user_model "github.com/justbrownbear/microservices_course_auth/internal/service/user/model"
 	"github.com/justbrownbear/microservices_course_auth/pkg/user_v1"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // ***************************************************************************************************
 // ***************************************************************************************************
-func (controllerInstance *controller) CreateUser(
+func (instance *controller) CreateUserAsync(
 	ctx context.Context,
 	request *user_v1.CreateUserRequest,
-) (*user_v1.CreateUserResponse, error) {
+) (*emptypb.Empty, error) {
 	payload := &user_model.CreateUserRequest{
 		Name:            request.Name,
 		Email:           request.Email,
@@ -22,15 +23,13 @@ func (controllerInstance *controller) CreateUser(
 		Role:            user_model.Role(request.Role),
 	}
 
-	chatID, err := controllerInstance.grpcAPI.CreateUser(ctx, payload)
+	err := instance.grpcAPI.CreateUserAsync(ctx, payload)
 	if err != nil {
 		log.Printf("%v", err)
 		return nil, err
 	}
 
-	result := &user_v1.CreateUserResponse{
-		Id: chatID,
-	}
+	result := &emptypb.Empty{}
 
 	return result, nil
 }

@@ -12,29 +12,30 @@ install-deps:
 	GOBIN=$(LOCAL_BIN) go install github.com/sqlc-dev/sqlc/cmd/sqlc@v1.26
 	GOBIN=$(LOCAL_BIN) go install golang.org/x/tools/cmd/goimports@latest
 	GOBIN=$(LOCAL_BIN) go install github.com/gojuno/minimock/v3/cmd/minimock@latest
-
-get-deps:
-	go get -u google.golang.org/protobuf/cmd/protoc-gen-go && \
-	go get -u google.golang.org/grpc/cmd/protoc-gen-go-grpc && \
-	go get -u google.golang.org/grpc && \
-	go get -u google.golang.org/grpc/reflection && \
-	go get -u github.com/jackc/pgx/v5 && \
-	go get -u github.com/jackc/pgx/v5/pgxpool && \
-	go get -u github.com/gojuno/minimock && \
-	go get -u github.com/gojuno/minimock/v3 && \
-	go get -u github.com/brianvoe/gofakeit && \
-	go get -u github.com/brianvoe/gofakeit/v6 && \
-	go get -u github.com/stretchr/testify/require && \
-	go get -u github.com/joho/godotenv && \
-	go get -u github.com/pkg/errors && \
-	go get -u github.com/gomodule/redigo/redis && \
-	go get -u google.golang.org/protobuf
-
-install-golangci-lint:
 	GOBIN=$(LOCAL_BIN) go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.53.3
 
+get-deps:
+	go get -u google.golang.org/protobuf/cmd/protoc-gen-go
+	go get -u google.golang.org/grpc/cmd/protoc-gen-go-grpc
+	go get -u google.golang.org/grpc
+	go get -u google.golang.org/grpc/reflection
+	go get -u github.com/jackc/pgx/v5
+	go get -u github.com/jackc/pgx/v5/pgxpool
+	go get -u github.com/gojuno/minimock
+	go get -u github.com/gojuno/minimock/v3
+	go get -u github.com/brianvoe/gofakeit
+	go get -u github.com/brianvoe/gofakeit/v6
+	go get -u github.com/stretchr/testify/require
+	go get -u github.com/joho/godotenv
+	go get -u github.com/pkg/errors
+	go get -u github.com/gomodule/redigo/redis
+	go get -u google.golang.org/protobuf
+	go get -u github.com/IBM/sarama
+
+format:
+	find . -name '*.go' -exec $(LOCAL_BIN)/goimports -w {} \;
+
 lint:
-	find . -name '*.go' -exec $(LOCAL_BIN)/goimports -w {} \; && \
 	$(LOCAL_BIN)/golangci-lint run ./... --config .golangci.pipeline.yaml
 
 goose-migration-status:

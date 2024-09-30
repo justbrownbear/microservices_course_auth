@@ -3,6 +3,7 @@ package grpc_api
 import (
 	"context"
 
+	"github.com/IBM/sarama"
 	user_model "github.com/justbrownbear/microservices_course_auth/internal/service/user/model"
 	"github.com/justbrownbear/microservices_course_auth/internal/transaction_manager"
 )
@@ -11,6 +12,8 @@ import (
 type GrpcAPI interface {
 	// Создание пользователя
 	CreateUser(ctx context.Context, userData *user_model.CreateUserRequest) (uint64, error)
+	// Создание пользователя асинхронно (через Kafka)
+	CreateUserAsync(ctx context.Context, userData *user_model.CreateUserRequest) error
 	// Получение данных пользователя по id
 	GetUser(ctx context.Context, userID uint64) (*user_model.GetUserResponse, error)
 	// Обновление данных пользователя
@@ -20,12 +23,14 @@ type GrpcAPI interface {
 }
 
 type grpcAPI struct {
-	txManager transaction_manager.TxManager
+	txManager     transaction_manager.TxManager
+	kafkaProducer sarama.SyncProducer
 }
 
 // InitGrpcAPI инициализирует gRPC API
-func InitGrpcAPI(txManager transaction_manager.TxManager) GrpcAPI {
+func InitGrpcAPI(txManager transaction_manager.TxManager, kafkaProducer sarama.SyncProducer) GrpcAPI {
 	return &grpcAPI{
-		txManager: txManager,
+		txManager:     txManager,
+		kafkaProducer: kafkaProducer,
 	}
 }

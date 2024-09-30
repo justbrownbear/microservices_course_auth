@@ -12,14 +12,14 @@ func (instance *controller) DeleteUser(
 	ctx context.Context,
 	request *user_v1.DeleteUserRequest,
 ) (*emptypb.Empty, error) {
-	result := &emptypb.Empty{}
-
 	userID := request.GetId()
 
 	err := instance.grpcAPI.DeleteUser(ctx, userID)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
+
+	result := &emptypb.Empty{}
 
 	return result, nil
 }

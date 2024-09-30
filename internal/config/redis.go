@@ -22,7 +22,7 @@ type redisConfig struct {
 	idleTimeoutSec       time.Duration
 }
 
-// RedisConfig интерфейс для получения конфигурации PostgreSQL
+// RedisConfig интерфейс для получения конфигурации Redis
 type RedisConfig interface {
 	GetRedisHost() string
 	GetRedisPort() uint16
@@ -91,22 +91,22 @@ func GetRedisConfig() (RedisConfig, error) {
 	return result, nil
 }
 
-func (c *redisConfig) GetRedisHost() string {
-	return c.host
+func (instance *redisConfig) GetRedisHost() string {
+	return instance.host
 }
 
-func (c *redisConfig) GetRedisPort() uint16 {
-	return c.port
+func (instance *redisConfig) GetRedisPort() uint16 {
+	return instance.port
 }
 
-func (c *redisConfig) GetRedisConnectionTimeoutSec() time.Duration {
-	return c.connectionTimeoutSec
+func (instance *redisConfig) GetRedisConnectionTimeoutSec() time.Duration {
+	return instance.connectionTimeoutSec
 }
 
-func (c *redisConfig) GetRedisMaxIdle() int {
-	return c.maxIdleSec
+func (instance *redisConfig) GetRedisMaxIdle() int {
+	return instance.maxIdleSec
 }
 
-func (c *redisConfig) GetRedisIdleTimeoutSec() time.Duration {
-	return c.idleTimeoutSec
+func (instance *redisConfig) GetRedisIdleTimeoutSec() time.Duration {
+	return instance.idleTimeoutSec
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	grpc_api "github.com/justbrownbear/microservices_course_auth/internal/api/grpc"
+	kafka_mock "github.com/justbrownbear/microservices_course_auth/internal/client/kafka/mocks"
 	user_service_mock "github.com/justbrownbear/microservices_course_auth/internal/service/user/mocks"
 	service_provider_mock "github.com/justbrownbear/microservices_course_auth/internal/service_provider/mocks"
 	"github.com/justbrownbear/microservices_course_auth/internal/transaction_manager"
@@ -65,8 +66,10 @@ func TestDeleteUser(test *testing.T) {
 					},
 				)
 
-				// Инициализируем GrpcAPI моком TxManager и ChatService
-				return grpc_api.InitGrpcAPI(txManagerMock)
+				kafkaProducerMock := kafka_mock.NewSyncProducerMock(mc)
+
+				// Инициализируем GrpcAPI моком TxManager и kafka producer
+				return grpc_api.InitGrpcAPI(txManagerMock, kafkaProducerMock)
 			},
 		},
 		{
@@ -91,8 +94,10 @@ func TestDeleteUser(test *testing.T) {
 					},
 				)
 
-				// Инициализируем GrpcAPI моком TxManager и ChatService
-				return grpc_api.InitGrpcAPI(txManagerMock)
+				kafkaProducerMock := kafka_mock.NewSyncProducerMock(mc)
+
+				// Инициализируем GrpcAPI моком TxManager и kafka producer
+				return grpc_api.InitGrpcAPI(txManagerMock, kafkaProducerMock)
 			},
 		},
 	}

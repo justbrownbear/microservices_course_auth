@@ -14,7 +14,10 @@ type controller struct {
 
 // InitUserController registers the controller as a UserV1Server on the provided gRPC server.
 // This enables the controller to handle user-related gRPC requests.
-func InitUserController(grpcServer *grpc.Server, grpcAPI grpc_api.GrpcAPI) {
+func InitUserController(
+	grpcServer *grpc.Server,
+	grpcAPI grpc_api.GrpcAPI,
+) {
 	controllerInstance := &controller{
 		grpcAPI: grpcAPI,
 	}

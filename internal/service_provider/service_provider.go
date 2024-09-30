@@ -21,7 +21,6 @@ type serviceProvider struct {
 
 	redisPool   *redis.Pool
 	redisConfig *config.RedisConfig
-
 	redisClient cache.RedisClient
 
 	userRepository user_repository.UserRepository

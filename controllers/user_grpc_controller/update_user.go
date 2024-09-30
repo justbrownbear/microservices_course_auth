@@ -5,7 +5,7 @@ import (
 
 	"google.golang.org/protobuf/types/known/emptypb"
 
-	grpc_converter "github.com/justbrownbear/microservices_course_auth/controllers/user_controller/converter"
+	grpc_converter "github.com/justbrownbear/microservices_course_auth/controllers/user_grpc_controller/converter"
 	"github.com/justbrownbear/microservices_course_auth/pkg/user_v1"
 )
 
